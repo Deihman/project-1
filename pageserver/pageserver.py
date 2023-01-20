@@ -92,32 +92,20 @@ def respond(sock):
 
     parts = request.split()
     if len(parts) > 1 and parts[0] == "GET":
-        if re.search("\.\.", parts[1]):
-            transmit(STATUS_FORBIDDEN, sock)
-            sock.shutdown(socket.SHUT_RDWR)
-            sock.close()
-            return
-
-        if re.search("\~", parts[1]):
-            transmit(STATUS_FORBIDDEN, sock)
-            sock.shutdown(socket.SHUT_RDWR)
-            sock.close()
-            return
-
         path = f"../pages{parts[1]}"
         log.info(f"PATH: {path}")
 
-        if not(os.path.isfile(path)):
+        if re.search("\.\.|\~", parts[1]):
+            transmit(STATUS_FORBIDDEN, sock)
+
+        elif not(os.path.isfile(path)):
             transmit(STATUS_NOT_FOUND, sock)
-            sock.shutdown(socket.SHUT_RDWR)
-            sock.close()
-            return
 
-        f = open(path, "r")
+        else:   # file exixts and doesn't contain illegal characters
+            f = open(path, "r")
+            transmit(STATUS_OK, sock)
+            transmit(f.read(), sock)
 
-        # file exixts and doesn't contain illegal characters
-        transmit(STATUS_OK, sock)
-        transmit(f.read(), sock)
     else:
         log.info("Unhandled request: {}".format(request))
         transmit(STATUS_NOT_IMPLEMENTED, sock)
