@@ -92,7 +92,7 @@ def respond(sock):
 
     parts = request.split()
     if len(parts) > 1 and parts[0] == "GET":
-        path = f"./pages{parts[1]}"
+        path = f"./{options.DOCROOT}{parts[1]}"
 
         if re.search(r"\.\.|\~", parts[1]):
             transmit(STATUS_FORBIDDEN, sock)
