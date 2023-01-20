@@ -22,7 +22,8 @@ log = logging.getLogger(__name__)
 
 import socket    # Basic TCP/IP communication on the internet
 import _thread   # Response computation runs concurrently with main program
-
+import os        # for checking file existance
+import re        # for checking for illegal characters
 
 def listen(portnum):
     """
@@ -91,13 +92,38 @@ def respond(sock):
 
     parts = request.split()
     if len(parts) > 1 and parts[0] == "GET":
+        if re.search("\.\.", parts[1]):
+            transmit(STATUS_FORBIDDEN, sock)
+            sock.shutdown(socket.SHUT_RDWR)
+            sock.close()
+            return
+
+        if re.search("\~", parts[1]):
+            transmit(STATUS_FORBIDDEN, sock)
+            sock.shutdown(socket.SHUT_RDWR)
+            sock.close()
+            return
+
+        path = f"../pages{parts[1]}"
+        log.info(f"PATH: {path}")
+
+        if not(os.path.isfile(path)):
+            transmit(STATUS_NOT_FOUND, sock)
+            sock.shutdown(socket.SHUT_RDWR)
+            sock.close()
+            return
+
+        f = open(path, "r")
+
+        # file exixts and doesn't contain illegal characters
         transmit(STATUS_OK, sock)
-        transmit(CAT, sock)
+        transmit(f.read(), sock)
     else:
         log.info("Unhandled request: {}".format(request))
         transmit(STATUS_NOT_IMPLEMENTED, sock)
         transmit("\nI don't handle this request: {}\n".format(request), sock)
 
+    f.close()
     sock.shutdown(socket.SHUT_RDWR)
     sock.close()
     return

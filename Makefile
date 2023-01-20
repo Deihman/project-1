@@ -12,10 +12,10 @@ stop:
 	@(bash stop.sh; make clean)
 
 run:
-	@(make start)
+	@(cp credentials.ini ./pageserver/; make start)
 
 clean:
-	@(rm -f *.pyc; rm -rf __pycache__)
+	@(rm -f *.pyc; rm -rf __pycache__; rm -f credentials.inil)
 
 veryclean:
 	@(rm -f ,pypid)
