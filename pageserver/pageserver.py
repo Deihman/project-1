@@ -92,26 +92,28 @@ def respond(sock):
 
     parts = request.split()
     if len(parts) > 1 and parts[0] == "GET":
-        path = f"../pages{parts[1]}"
-        log.info(f"PATH: {path}")
+        path = f"./pages{parts[1]}"
 
-        if re.search("\.\.|\~", parts[1]):
+        if re.search(r"\.\.|\~", parts[1]):
             transmit(STATUS_FORBIDDEN, sock)
+            transmit("Uh oh spaghettios", sock)
 
         elif not(os.path.isfile(path)):
             transmit(STATUS_NOT_FOUND, sock)
+            transmit('get real', sock)
 
         else:   # file exixts and doesn't contain illegal characters
             f = open(path, "r")
+            FILE_CONTENTS = f.read()
             transmit(STATUS_OK, sock)
-            transmit(f.read(), sock)
+            transmit(FILE_CONTENTS, sock)
+            f.close()
 
     else:
         log.info("Unhandled request: {}".format(request))
         transmit(STATUS_NOT_IMPLEMENTED, sock)
         transmit("\nI don't handle this request: {}\n".format(request), sock)
 
-    f.close()
     sock.shutdown(socket.SHUT_RDWR)
     sock.close()
     return
