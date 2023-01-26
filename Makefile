@@ -15,7 +15,7 @@ run:
 	@(cp credentials.ini ./pageserver/; make start)
 
 clean:
-	@(rm -f *.pyc; rm -rf __pycache__; rm -f credentials.inil)
+	@(cd ./pageserver; rm -f *.pyc; rm -rf __pycache__; rm -f credentials.ini; cd ../)
 
 veryclean:
 	@(rm -f ,pypid)
